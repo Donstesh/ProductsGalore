@@ -13,4 +13,9 @@ class Order extends Model
         'client_id',
         'quantity_ordered',
     ];
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
 }
