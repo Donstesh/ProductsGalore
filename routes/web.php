@@ -14,18 +14,51 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $products = \App\Models\Product::all(); // Fetch all products from the database
+    return view('welcome', compact('products'));
 });
 
-Route::get('/products', 'ProductController@index')->name('products.index');
-Route::get('/products/create', 'ProductController@create')->name('products.create');
-Route::post('/products', 'ProductController@store')->name('products.store');
-Route::get('/products/{product}/edit', 'ProductController@edit')->name('products.edit');
-Route::put('/products/{product}', 'ProductController@update')->name('products.update');
-Route::delete('/products/{product}', 'ProductController@destroy')->name('products.destroy');
+Auth::routes();
 
-Route::get('/orders', 'OrderController@index')->name('orders.index');
-Route::get('/orders/create', 'OrderController@create')->name('orders.create');
-Route::post('/orders', 'OrderController@store')->name('orders.store');
-Route::get('/orders/{order}', 'OrderController@show')->name('orders.show');
+Route::middleware(['auth'])->group(function () {
+    // Product Routes
+    Route::get('/products', 'ProductManagementController@index');
+    Route::post('/products', 'ProductManagementController@store');
+    Route::get('/products/{product}/edit', 'ProductManagementController@edit');
+    Route::put('/products/{product}', 'ProductManagementController@update');
+    Route::delete('/products/{product}', 'ProductManagementController@destroy');
 
+    Route::get('/products', function () {
+        return view('products.index');
+    });
+
+
+    // Order Routes
+    Route::get('/orders', 'OrderManagementController@index');
+    Route::post('/orders', 'OrderManagementController@store');
+    Route::get('/orders/{order}', 'OrderManagementController@show');
+
+    Route::get('/orders/{order}/edit', 'OrderManagementController@edit');
+    Route::put('/orders/{order}', 'OrderManagementController@update');
+    Route::delete('/orders/{order}', 'OrderManagementController@destroy');
+
+    Route::get('/orders', function () {
+        return view('orders.index');
+    });
+});
+
+
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
